@@ -1,0 +1,65 @@
+[
+    {
+        "id": "8ca387f0-33fb-11ef-8d70-39804b579554",
+        "firstName": "Akanksha",
+        "lastName": "Deshmukh",
+        "email": "Akanksha@gmail.com",
+        "password": "Aks@34",
+        "dateOfBirth": "1999-11-09T11:35:35.000Z",
+        "role": "user"
+    },
+    {
+        "id": "5b315390-3334-11ef-a30c-efc71bcfc02e",
+        "firstName": "Aniket",
+        "lastName": "Jadhav",
+        "email": "aniket45@gmail.com",
+        "password": "ani@123",
+        "dateOfBirth": "1998-06-09T09:46:32.000Z",
+        "role": "user"
+    },
+    {
+        "id": "f3f62c90-33a2-11ef-b76d-818dcba9b966",
+        "firstName": "Darshan",
+        "lastName": "Shinde",
+        "email": "darsh@gmail.com",
+        "password": "darsh@123",
+        "dateOfBirth": "1998-03-03T09:46:32.000Z",
+        "role": "admin"
+    },
+    {
+        "id": "19696610-345f-11ef-aa9b-adc845599818",
+        "firstName": "Komal",
+        "lastName": "Gawde",
+        "email": "Komal@gmail.com",
+        "password": "Kom@33",
+        "dateOfBirth": "1999-02-15T05:32:48.000Z",
+        "role": "user"
+    },
+    {
+        "id": "59217bd0-3333-11ef-b3c8-817cc3b91e88",
+        "firstName": "Pratik",
+        "lastName": "Shirude",
+        "email": "prts45@gmail.com",
+        "password": "prts@123",
+        "dateOfBirth": "1998-03-28T09:46:32.000Z",
+        "role": "user"
+    },
+    {
+        "id": "87edb9f0-33ac-11ef-b5ca-15232ba254c2",
+        "firstName": "Vish",
+        "lastName": "Andhalkar",
+        "email": "Vish@gmail.com",
+        "password": "vis@1877",
+        "dateOfBirth": "1998-07-09T23:15:56.000Z",
+        "role": "user"
+    },
+    {
+        "id": "2edb0d10-33f0-11ef-83c2-dbdfc911ee16",
+        "firstName": "Vishakha",
+        "lastName": "Jadhav",
+        "email": "vishakha@gmail.com",
+        "password": "Visk@55",
+        "dateOfBirth": "1999-10-06T10:04:12.000Z",
+        "role": "user"
+    }
+]
