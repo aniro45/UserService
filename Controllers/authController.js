@@ -125,7 +125,7 @@ export async function signup(req, res, next) {
         });
         user.save();
         const { id, role } = user;
-        const token = generateJWTForVerification({ sub: id, role: role });
+        const token = await generateJWTForVerification({ sub: id, role: role });
         const verificationURL = generateAccountVerificationURL(token);
         sendMailWithVerificationLink(verificationURL, user.email);
         res.status(201).json({
@@ -227,7 +227,7 @@ async function generateTokenWithImmediateExpiry(data) {
     return token;
 }
 
-async function generateAccountVerificationURL(token) {
+function generateAccountVerificationURL(token) {
     const URL = `http://localhost:5560/api/v1/email_verification/?token=${token}`;
     return URL;
 }
