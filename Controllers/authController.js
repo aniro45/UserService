@@ -2,6 +2,7 @@ import User from "../Models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { userRoles } from "../constants.js";
+import axios from "axios";
 
 export function isAdmin(req, res, next) {
     if (req.user.role === userRoles.ADMIN) {
@@ -93,8 +94,25 @@ export async function login(req, res, next) {
     }
 }
 
-export async function sendMailWithVerificationLink(URL, email) {
+export async function sendMailWithVerificationLink(verificationURL, toEmail) {
+    try {
+        const EMAIL_SERVICE_ENDPOINT_FOR_SEND = `http://localhost:5570/api/v1/email/sendEmail?key=${process.env.EMAIL_SERVICE_API_KEY}`;
+        const result = await axios.post(EMAIL_SERVICE_ENDPOINT_FOR_SEND, {
+            to: toEmail,
+            from: process.env.FROM_EMAIL_ADDRESS,
+            subject: `[${process.env.PROJECT}] Verify your email`,
+            text: `please click on the below link to verify your email address`,
+            html: `<a>${verificationURL}</a>`,
+        });
 
+        if (result.data.status !== "FAILED") {
+            console.log("Email sent successfully!");
+        } else {
+            console.log("FAILED sending email");
+        }
+    } catch (error) {
+        console.log(`problem while sending the email \n Error:${error}`);
+    }
 }
 
 export async function signup(req, res, next) {
@@ -106,13 +124,14 @@ export async function signup(req, res, next) {
             password: hashedPassword,
         });
         user.save();
-        const { id, role } = user
-        const token = generateJWTForVerification({sub: id, role: role});
-        const URL = generateAccountVerificationURL(token);
-        sendMailWithVerificationLink(URL, user.email) //TODO: add code for send email
+        const { id, role } = user;
+        const token = generateJWTForVerification({ sub: id, role: role });
+        const verificationURL = generateAccountVerificationURL(token);
+        sendMailWithVerificationLink(verificationURL, user.email);
         res.status(201).json({
             status: "SUCCESS",
-            message: "Account created successfully.",
+            message:
+                "Account created successfully. Please verify your email before proceed",
             data: user,
         });
     } catch (error) {
@@ -212,7 +231,6 @@ async function generateAccountVerificationURL(token) {
     const URL = `http://localhost:5560/api/v1/email_verification/?token=${token}`;
     return URL;
 }
-
 
 export async function verifyJWT(req, res, next) {
     try {
