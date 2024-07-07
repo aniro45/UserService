@@ -6,7 +6,7 @@ const User = getSequelize().define(
     {
         id: {
             type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV1
+            defaultValue: DataTypes.UUIDV1,
         },
         firstName: {
             type: DataTypes.TEXT,
@@ -32,13 +32,13 @@ const User = getSequelize().define(
         },
         role: {
             type: DataTypes.ENUM,
-            values: ['admin', 'user'],
-            defaultValue: 'user'
-        }, 
-        verified: {
+            values: ["admin", "user"],
+            defaultValue: "user",
+        },
+        verifiedEmail: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false
-        }
+            defaultValue: false,
+        },
     },
     {
         freezeTableName: true,

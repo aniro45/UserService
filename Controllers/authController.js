@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { userRoles } from "../constants.js";
 import axios from "axios";
+import { getHTMLForEmailVerification } from "../templates/emailTemplates.js";
 
 export function isAdmin(req, res, next) {
     if (req.user.role === userRoles.ADMIN) {
@@ -94,15 +95,19 @@ export async function login(req, res, next) {
     }
 }
 
-export async function sendMailWithVerificationLink(verificationURL, toEmail) {
+export async function sendMailWithVerificationLink(
+    verificationURL,
+    toEmail,
+    firstName,
+) {
     try {
         const EMAIL_SERVICE_ENDPOINT_FOR_SEND = `http://localhost:5570/api/v1/email/sendEmail?key=${process.env.EMAIL_SERVICE_API_KEY}`;
+        const html = getHTMLForEmailVerification(firstName, verificationURL);
         const result = await axios.post(EMAIL_SERVICE_ENDPOINT_FOR_SEND, {
             to: toEmail,
             from: process.env.FROM_EMAIL_ADDRESS,
-            subject: `[${process.env.PROJECT}] Verify your email`,
-            text: `please click on the below link to verify your email address`,
-            html: `<a>${verificationURL}</a>`,
+            subject: `Verify your email`,
+            html: html,
         });
 
         if (result.data.status !== "FAILED") {
@@ -127,7 +132,11 @@ export async function signup(req, res, next) {
         const { id, role } = user;
         const token = await generateJWTForVerification({ sub: id, role: role });
         const verificationURL = generateAccountVerificationURL(token);
-        sendMailWithVerificationLink(verificationURL, user.email);
+        sendMailWithVerificationLink(
+            verificationURL,
+            user.email,
+            user.firstName,
+        );
         res.status(201).json({
             status: "SUCCESS",
             message:
@@ -173,9 +182,9 @@ export async function deleteProfile(req, res) {
 
 export async function makeUserVerified(req, res) {
     try {
-        const token = req.param.token;
+        const token = req.query.token;
         const jwtSecretKey = process.env.JWT_SECRET_KEY;
-        jwt.verify(token, jwtSecretKey, (err, payload) => {
+        jwt.verify(token, jwtSecretKey, async (err, payload) => {
             if (err) {
                 res.status(401).send({
                     status: "FAIL",
@@ -184,7 +193,7 @@ export async function makeUserVerified(req, res) {
                 });
                 return;
             }
-            const user = User.findOne({ where: { id: payload.sub } });
+            const user = await User.findOne({ where: { id: payload.sub } });
             user.verifiedEmail = true;
             user.save();
             res.status(200).json({
@@ -228,7 +237,7 @@ async function generateTokenWithImmediateExpiry(data) {
 }
 
 function generateAccountVerificationURL(token) {
-    const URL = `http://localhost:5560/api/v1/email_verification/?token=${token}`;
+    const URL = `http://localhost:5560/api/v1/auth/email_verification/?token=${token}`;
     return URL;
 }
 
@@ -274,6 +283,25 @@ export async function getProfile(req, res, next) {
         res.status(501).json({
             status: "FAILED",
             message: "Problem while fetching the user",
+            error: error,
+        });
+    }
+}
+
+export async function isUserVerified(req, res, next) {
+    try {
+        const user = await User.findOne({ where: { id: req.user.id } });
+        if (!user.verifiedEmail) {
+            return res.status(403).json({
+                status: "FAILED",
+                message: "User is not verified. Please verify the user first",
+            });
+        }
+        next();
+    } catch (error) {
+        res.status(501).json({
+            status: "FAILED",
+            message: "problem while logging in",
             error: error,
         });
     }
