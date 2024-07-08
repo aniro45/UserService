@@ -290,8 +290,7 @@ export async function getProfile(req, res, next) {
 
 export async function isUserVerified(req, res, next) {
     try {
-        const user = await User.findOne({ where: { id: req.user.id } });
-        if (!user.verifiedEmail) {
+        if (!req.use.verifiedEmail) {
             return res.status(403).json({
                 status: "FAILED",
                 message: "User is not verified. Please verify the user first",
