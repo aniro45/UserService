@@ -290,7 +290,7 @@ export async function getProfile(req, res, next) {
 
 export async function isUserVerified(req, res, next) {
     try {
-        if (!req.use.verifiedEmail) {
+        if (!req.user.verifiedEmail) {
             return res.status(403).json({
                 status: "FAILED",
                 message: "User is not verified. Please verify the user first",
