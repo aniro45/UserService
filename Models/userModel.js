@@ -1,7 +1,8 @@
-import { DataTypes, Sequelize } from "sequelize";
+import { DataTypes } from "sequelize";
 import { getSequelize } from "../dbconfig.js";
 
-const User = getSequelize().define(
+const sequelize = getSequelize();
+const User = sequelize.define(
     "user",
     {
         id: {

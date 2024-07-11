@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { userRoles } from "../constants.js";
 import axios from "axios";
 import { getHTMLForEmailVerification } from "../templates/emailTemplates.js";
+import { MessageQueue } from "../MessageQueue.js";
+
 
 export function isAdmin(req, res, next) {
     if (req.user.role === userRoles.ADMIN) {
@@ -75,6 +77,7 @@ export async function authenticateUser(req, res, next) {
 }
 
 export async function login(req, res, next) {
+    MessageQueue.publish('SEND_EMAIL', "Hey there from UserLogin");
     try {
         const { id, role, email } = req.user;
         const token = await generateJWT({
@@ -95,6 +98,25 @@ export async function login(req, res, next) {
     }
 }
 
+export async function sendMailWithVerificationLinkWithRabbitMQ(
+    verificationURL,
+    toEmail,
+    firstName,
+) {
+    try {
+        const html = getHTMLForEmailVerification(firstName, verificationURL);
+        const payload = {
+            to: toEmail,
+            from: process.env.FROM_EMAIL_ADDRESS,
+            subject: `Verify your email`,
+            html: html,
+        };
+        MessageQueue.publish("SEND_EMAIL", JSON.stringify(payload));
+    } catch (error) {
+        console.log(`problem while sending the email \n Error:${error}`);
+    }
+}
+
 export async function sendMailWithVerificationLink(
     verificationURL,
     toEmail,
@@ -103,12 +125,13 @@ export async function sendMailWithVerificationLink(
     try {
         const EMAIL_SERVICE_ENDPOINT_FOR_SEND = `http://localhost:5570/api/v1/email/sendEmail?key=${process.env.EMAIL_SERVICE_API_KEY}`;
         const html = getHTMLForEmailVerification(firstName, verificationURL);
-        const result = await axios.post(EMAIL_SERVICE_ENDPOINT_FOR_SEND, {
+        const payload = {
             to: toEmail,
             from: process.env.FROM_EMAIL_ADDRESS,
             subject: `Verify your email`,
             html: html,
-        });
+        }
+        const result = await axios.post(EMAIL_SERVICE_ENDPOINT_FOR_SEND, payload);
 
         if (result.data.status !== "FAILED") {
             console.log("Email sent successfully!");
@@ -132,7 +155,12 @@ export async function signup(req, res, next) {
         const { id, role } = user;
         const token = await generateJWTForVerification({ sub: id, role: role });
         const verificationURL = generateAccountVerificationURL(token);
-        sendMailWithVerificationLink(
+        // sendMailWithVerificationLink(
+        //     verificationURL,
+        //     user.email,
+        //     user.firstName,
+        // );
+        sendMailWithVerificationLinkWithRabbitMQ(
             verificationURL,
             user.email,
             user.firstName,

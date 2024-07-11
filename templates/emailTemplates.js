@@ -26,7 +26,7 @@ export function getHTMLForEmailVerification(firstName, verificationLink) {
             padding: 10px 20px;
             margin-top: 20px;
             color: #fff;
-            background-color: #3498db;
+            background: linear-gradient(210deg, rgba(34,195,40,1) 0%, rgba(64,85,207,0.8400152297247023) 100%);
             border-radius: 5px;
             text-decoration: none;
         }
